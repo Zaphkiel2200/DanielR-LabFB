@@ -1,0 +1,27 @@
+{
+  "name": "danielr-labfb",
+  "version": "1.0.0",
+  "description": "DANIEL FELIPE RIVAS ULCHUR\r CÓDIGO: A00405514\r LABORATORIO DE FIREBASE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zaphkiel2200/DanielR-LabFB.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zaphkiel2200/DanielR-LabFB/issues"
+  },
+  "homepage": "https://github.com/Zaphkiel2200/DanielR-LabFB#readme",
+  "devDependencies": {
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "husky": "^9.1.7"
+  }
+}
