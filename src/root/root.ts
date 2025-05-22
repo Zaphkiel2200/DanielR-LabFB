@@ -1,73 +1,73 @@
-import { auth } from './services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import './components/header/header';
+import { store } from '../flux/Store';
+import './Root.css';
 
-export class AppRoot extends HTMLElement {
-  private header: CustomHeader;
+class Root extends HTMLElement {
+    private unsubscribe: () => void;
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    this.header = document.createElement('custom-header') as CustomHeader;
-  }
-
-  connectedCallback() {
-    this.render();
-    this.setupAuthListener();
-  }
-
-  private setupAuthListener() {
-    onAuthStateChanged(auth, (user) => {
-      this.header.setUser(user);
-      this.renderContent(user);
-    });
-  }
-
-  private renderContent(user: any) {
-    const content = this.shadowRoot?.querySelector('#content');
-    if (!content) return;
-
-    if (user) {
-      content.innerHTML = `
-        <main class="app-container">
-          <custom-header></custom-header>
-          <div class="content">
-            <h2>Bienvenido, ${user.email}</h2>
-            <!-- Aquí irían los componentes de tareas -->
-            <task-manager></task-manager>
-          </div>
-        </main>
-      `;
-    } else {
-      content.innerHTML = `
-        <auth-screen></auth-screen>
-      `;
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.unsubscribe = () => {};
     }
-  }
 
-  render() {
-    if (!this.shadowRoot) return;
+    connectedCallback() {
+        this.render();
+        this.setupNavigation();
+    }
 
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          height: 100vh;
+    disconnectedCallback() {
+        this.unsubscribe();
+    }
+
+    private setupNavigation() {
+        this.unsubscribe = store.subscribe(() => {
+            this.updateView();
+        });
+        store.load();
+        this.updateView();
+    }
+
+    private updateView() {
+        const state = store.getState();
+        const path = state.currentPath || '/';
+
+        this.shadowRoot!.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    min-height: 100vh;
+                }
+                
+                .container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+            </style>
+            <div class="container">
+                ${this.getViewForPath(path)}
+            </div>
+        `;
+    }
+
+    private getViewForPath(path: string): string {
+        switch (path) {
+            case '/':
+                return '<landing-page></landing-page>';
+            case '/login':
+                return '<login-page></login-page>';
+            case '/register':
+                return '<register-page></register-page>';
+            case '/dashboard':
+                return '<dashboard-page></dashboard-page>';
+            default:
+                return '<landing-page></landing-page>';
         }
-        
-        #content {
-          height: 100%;
-        }
-      </style>
-      
-      <div id="content">
-        <custom-header></custom-header>
-        <auth-screen></auth-screen>
-      </div>
-    `;
+    }
 
-    this.shadowRoot.querySelector('custom-header')?.replaceWith(this.header);
-  }
+    render() {
+        this.updateView();
+    }
 }
 
-customElements.define('app-root', AppRoot);
+export default Root;
