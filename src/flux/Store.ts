@@ -12,11 +12,11 @@ class Store {
     private _myState: State = {
         currentPath: ''
     }
-    // Los componentes
+    // componentes
     private _listeners: Listener[] = [];
 
     constructor() {
-        AppDispatcher.register(this._handleActions.bind(this)); // Bind the context of this method to the Store instance
+        AppDispatcher.register(this._handleActions.bind(this)); 
     }
 
     getState() {
@@ -36,7 +36,7 @@ class Store {
                 break;
         }
 
-        // Persistir el estado en localStorage
+        // en localStorage
         this.persist();
     }
 
@@ -46,14 +46,10 @@ class Store {
             listener(state);
         }
     }
-
-    // Permite a los componentes suscribirse al store
     subscribe(listener: Listener): void {
         this._listeners.push(listener);
-        listener(this.getState()); // Emitir estado actual al suscribirse
+        listener(this.getState()); 
     }
-
-    // Permite quitar la suscripción
     unsubscribe(listener: Listener): void {
         this._listeners = this._listeners.filter(l => l !== listener);
     }
@@ -66,7 +62,7 @@ class Store {
         const persistedState = localStorage.getItem('flux:state');
         if (persistedState) {
             this._myState = JSON.parse(persistedState);
-            this._emitChange(); // Emitir el nuevo estado
+            this._emitChange(); 
         }
     }
 

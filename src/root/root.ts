@@ -1,72 +1,68 @@
-import { store } from '../flux/Store';
-import './Root.css';
+import { State, store } from "../flux/Store";
 
 class Root extends HTMLElement {
-    private unsubscribe: () => void;
-
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this.unsubscribe = () => {};
+        this.handleRouteChange = this.handleRouteChange.bind(this);
+        store.subscribe((state: State) => {this.handleRouteChange(state)});
     }
 
     connectedCallback() {
         this.render();
-        this.setupNavigation();
+        this.handleRouteChange();
     }
 
-    disconnectedCallback() {
-        this.unsubscribe();
-    }
-
-    private setupNavigation() {
-        this.unsubscribe = store.subscribe(() => {
-            this.updateView();
-        });
-        store.load();
-        this.updateView();
-    }
-
-    private updateView() {
-        const state = store.getState();
-        const path = state.currentPath || '/';
-
-        this.shadowRoot!.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    min-height: 100vh;
-                }
-                
-                .container {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }
-            </style>
-            <div class="container">
-                ${this.getViewForPath(path)}
-            </div>
-        `;
-    }
-
-    private getViewForPath(path: string): string {
+    handleRouteChange(state = store.getState()) {
+        if (!this.shadowRoot) return;
+        const path = state.currentPath || window.location.pathname;
+        window.history.replaceState({}, '', path); // Actualiza la URL sin recargar la página
+        const content = this.shadowRoot.querySelector('#content');
+        if (!content) return;
+        content.innerHTML = '';
+        console.log(path);
         switch (path) {
             case '/':
-                return '<landing-page></landing-page>';
+                content.innerHTML = `<landing-page></landing-page>`;
+                break;
             case '/login':
-                return '<login-page></login-page>';
+                content.innerHTML = `<login-page></login-page>`;
+                break;
             case '/register':
-                return '<register-page></register-page>';
-            case '/dashboard':
-                return '<dashboard-page></dashboard-page>';
+                content.innerHTML = `<register-page></register-page>`;
+                break;
+            case '/dashboard/supabase':
+                content.innerHTML = `
+                <dashboard-page>
+
+                </dashboard-page>`;
+                break;
             default:
-                return '<landing-page></landing-page>';
+                content.innerHTML = `<h1>404 - Página no encontrada</h1>`;
+                break;
         }
     }
 
     render() {
-        this.updateView();
+        if (!this.shadowRoot) return;
+            
+        this.shadowRoot.innerHTML = `
+            <style>
+                #root {
+                    width: 100vw;
+                    height: 100vh;
+                    background-color: #333; /* Gris oscuro */
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+            </style>
+            <div id="root">
+                <header-element></header-element>
+                <div id="content">
+                </div>
+            </div>
+        `;
     }
 }
 

@@ -1,19 +1,14 @@
-import { AppRoot } from './root';
-import './components/auth/auth';
-import './components/tasks/task-manager';
+import Root from "./Root/Root";
+import Header from "./components/Header";
+import DashboardPage from "./pages/DashboardPage";
 
-customElements.define('app-root', AppRoot);
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
-document.addEventListener('DOMContentLoaded', () => {
-  const app = document.querySelector('#app');
-  if (app) {
-    app.innerHTML = '<app-root></app-root>';
-  }
-});
-
-window.addEventListener('error', (event) => {
-  console.error('Error global:', event.error);
-});
-
-export * from './services/firebase';
-export * from './components/header/header';
+customElements.define('root-element', Root);
+customElements.define('header-element', Header);
+customElements.define('landing-page', LandingPage);
+customElements.define('login-page', LoginPage);
+customElements.define('register-page', RegisterPage);
+customElements.define('dashboard-page', DashboardPage);
