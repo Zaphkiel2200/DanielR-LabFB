@@ -1,69 +1,95 @@
-import { State, store } from "../flux/Store";
+import { AppPages } from './types';
+import Header from './components/Header';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
+import TaskList from './components/TaskList';
 
-class Root extends HTMLElement {
+class RootElement extends HTMLElement {
+    private currentPage: AppPages = 'login';
+    private header: Header;
+    private loginPage: LoginPage;
+    private registerPage: RegisterPage;
+    private taskList: TaskList;
+
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this.handleRouteChange = this.handleRouteChange.bind(this);
-        store.subscribe((state: State) => {this.handleRouteChange(state)});
+        
+        this.header = new Header();
+        this.loginPage = new LoginPage();
+        this.registerPage = new RegisterPage();
+        this.taskList = new TaskList();
     }
 
     connectedCallback() {
         this.render();
-        this.handleRouteChange();
+        this.setupListeners();
     }
 
-    handleRouteChange(state = store.getState()) {
-        if (!this.shadowRoot) return;
-        const path = state.currentPath || window.location.pathname;
-        window.history.replaceState({}, '', path); // Actualiza la URL sin recargar la página
-        const content = this.shadowRoot.querySelector('#content');
-        if (!content) return;
-        content.innerHTML = '';
-        console.log(path);
-        switch (path) {
-            case '/':
-                content.innerHTML = `<landing-page></landing-page>`;
-                break;
-            case '/login':
-                content.innerHTML = `<login-page></login-page>`;
-                break;
-            case '/register':
-                content.innerHTML = `<register-page></register-page>`;
-                break;
-            case '/dashboard/supabase':
-                content.innerHTML = `
-                <dashboard-page>
+    render() {
+        this.shadowRoot!.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    height: 100vh;
+                }
+                
+                .container {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                
+                .content {
+                    flex: 1;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 20px;
+                }
+            </style>
+            <div class="container">
+                <app-header></app-header>
+                <div class="content" id="content"></div>
+            </div>
+        `;
 
-                </dashboard-page>`;
+        this.updateContent();
+    }
+
+    private updateContent() {
+        const content = this.shadowRoot!.getElementById('content')!;
+        content.innerHTML = '';
+
+        switch (this.currentPage) {
+            case 'login':
+                content.appendChild(this.loginPage);
                 break;
-            default:
-                content.innerHTML = `<h1>404 - Página no encontrada</h1>`;
+            case 'register':
+                content.appendChild(this.registerPage);
+                break;
+            case 'tasks':
+                content.appendChild(this.taskList);
                 break;
         }
     }
 
-    render() {
-        if (!this.shadowRoot) return;
-            
-        this.shadowRoot.innerHTML = `
-            <style>
-                #root {
-                    width: 100vw;
-                    height: 100vh;
-                    background-color: #333; /* Gris oscuro */
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
-            </style>
-            <div id="root">
-                <header-element></header-element>
-                <div id="content">
-                </div>
-            </div>
-        `;
+    private setupListeners() {
+        this.addEventListener('navigate', (e: CustomEvent) => {
+            this.currentPage = e.detail.page;
+            this.updateContent();
+        });
+
+        this.addEventListener('login-success', () => {
+            this.currentPage = 'tasks';
+            this.updateContent();
+        });
+
+        this.addEventListener('logout', () => {
+            this.currentPage = 'login';
+            this.updateContent();
+        });
     }
 }
 
-export default Root;
+customElements.define('root-element', RootElement);

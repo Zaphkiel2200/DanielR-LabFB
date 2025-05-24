@@ -1,14 +1,13 @@
-import Root from "./Root/Root";
-import Header from "./components/Header";
-import DashboardPage from "./pages/DashboardPage";
+import RootElement from './Root/Root';
+import './components/Header';
+import './components/LoginPage';
+import './components/RegisterPage';
+import './components/TaskList';
+import './components/TaskCard';
 
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from '../FirebaseConfig';
 
-customElements.define('root-element', Root);
-customElements.define('header-element', Header);
-customElements.define('landing-page', LandingPage);
-customElements.define('login-page', LoginPage);
-customElements.define('register-page', RegisterPage);
-customElements.define('dashboard-page', DashboardPage);
+initializeApp(firebaseConfig);
+
+document.body.appendChild(new RootElement());
